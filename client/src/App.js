@@ -4,6 +4,10 @@ import "./App.css";
 import SignUpSignIn from "./SignUpSignIn";
 import TopNavbar from "./TopNavbar";
 import Secret from "./Secret";
+import Secure1 from "./Secure1";
+import Secure2 from "./Secure2";
+import Secure3 from "./Secure3";
+
 
 class App extends Component {
   constructor() {
@@ -21,16 +25,26 @@ class App extends Component {
     const { username, password, confirmPassword } = credentials;
     if (!username.trim() || !password.trim() ) {
       this.setState({
-        signUpSignInError: "Must Provide All Fields"
+        signUpSignInError: "Must provide all fields"
       });
-    } else {
+    } else if (password !== confirmPassword) {
+        this.setState({
+          signUpSignInError: "Passwords must match"
+        });
+      } else {
 
       fetch("/api/signup", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(credentials)
       }).then((res) => {
-        return res.json();
+        if (res.status === 422) {
+          console.log("Username is already in use")
+          this.setState({
+            signUpSignInError: "Username is already in use"
+          });
+        }
+        else return res.json();
       }).then((data) => {
         const { token } = data;
         localStorage.setItem("token", token);
@@ -43,7 +57,32 @@ class App extends Component {
   }
 
   handleSignIn(credentials) {
-    // Handle Sign Up
+    const { username, password } = credentials;
+    if (!username.trim() || !password.trim() ) {
+      this.setState({
+        signUpSignInError: "Must provide all fields"
+      });
+    } else {
+      fetch("/api/signin", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(credentials)
+      }).then((res) => {
+        if (res.status === 401) {
+          return this.setState({
+            signUpSignInError: "Invalid Login"
+          });
+        }
+        return res.json();
+      }).then((data) => {
+        const { token } = data;
+        localStorage.setItem("token", token);
+        this.setState({
+          signUpSignInError: "",
+          authenticated: token
+        });
+      });
+    }
   }
 
   handleSignOut() {
@@ -55,9 +94,10 @@ class App extends Component {
 
   renderSignUpSignIn() {
     return (
-      <SignUpSignIn 
-        error={this.state.signUpSignInError} 
-        onSignUp={this.handleSignUp} 
+      <SignUpSignIn
+        error={this.state.signUpSignInError}
+        onSignUp={this.handleSignUp}
+        onSignIn={this.handleSignIn}
       />
     );
   }
@@ -68,6 +108,9 @@ class App extends Component {
         <Switch>
           <Route exact path="/" render={() => <h1>I am protected!</h1>} />
           <Route exact path="/secret" component={Secret} />
+          <Route exact path="/secure1" component={Secure1} />
+          <Route exact path="/secure2" component={Secure2} />
+          <Route exact path="/secure3" component={Secure3} />
           <Route render={() => <h1>NOT FOUND!</h1>} />
         </Switch>
       </div>
@@ -81,12 +124,12 @@ class App extends Component {
     } else {
       whatToShow = this.renderSignUpSignIn();
     }
-       
+
     return (
       <BrowserRouter>
         <div className="App">
-          <TopNavbar 
-            showNavItems={this.state.authenticated} 
+          <TopNavbar
+            showNavItems={this.state.authenticated}
             onSignOut={this.handleSignOut} />
           {whatToShow}
         </div>

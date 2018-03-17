@@ -39,6 +39,15 @@ app.get("/api/canigetthis", function (req, res) {
 app.get("/api/secret", function (req, res) {
   res.send(`The current user is ${req.user.username}`);
 });
+app.get("/api/secure1", function (req, res) {
+  res.send(`The Secure1 user is ${req.user.username}`);
+});
+app.get("/api/secure2", function (req, res) {
+  res.send(`The Secure2 user is ${req.user.username}`);
+});
+app.get("/api/secure3", function (req, res) {
+  res.send(`The Secure3 user is ${req.user.username}`);
+});
 
 const port = process.env.PORT || 3001;
 app.listen(port, () => {
