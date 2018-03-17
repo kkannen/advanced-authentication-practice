@@ -29,7 +29,7 @@ const TopNavbar = (props) => {
 
 TopNavbar.propTypes = {
   onSignOut: PropTypes.func.isRequired,
-  showNavItems: PropTypes.string.isRequired
+  showNavItems: PropTypes.bool.isRequired
 };
 
 export default TopNavbar;
